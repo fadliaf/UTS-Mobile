@@ -5,9 +5,8 @@ class KontakPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Daftar kontak statis
     final List<Map<String, String>> kontakList = [
-      {'nama': 'Ahmad ', 'telepon': '081234567890', 'foto': 'assets/images/kontak.png'},
+      {'nama': 'Ahmad', 'telepon': '081234567890', 'foto': 'assets/images/kontak.png'},
       {'nama': 'Udin Petot', 'telepon': '081234567891', 'foto': 'assets/images/kontak.png'},
       {'nama': 'Rizky Maulana', 'telepon': '081234567892', 'foto': 'assets/images/kontak.png'},
       {'nama': 'Siti Rahma', 'telepon': '081234567893', 'foto': 'assets/images/kontak.png'},
@@ -25,42 +24,98 @@ class KontakPage extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: Colors.grey[100],
-      body: ListView.builder(
-        itemCount: kontakList.length,
-        padding: const EdgeInsets.all(10),
-        itemBuilder: (context, index) {
-          final kontak = kontakList[index];
-          return Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            elevation: 2,
-            margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-            child: ListTile(
-              leading: CircleAvatar(
-                radius: 26,
-                backgroundImage: AssetImage(kontak['foto']!),
-              ),
-              title: Text(
-                kontak['nama']!,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              subtitle: Text(kontak['telepon']!),
-              trailing: IconButton(
-                icon: const Icon(Icons.call, color: Colors.green),
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Menelepon ${kontak['nama']}...'),
-                      duration: const Duration(seconds: 1),
+      backgroundColor: Colors.transparent,
+      body: Column(
+        children: [
+
+          // List Kontak
+          Expanded(
+            child: ListView.builder(
+              itemCount: kontakList.length,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemBuilder: (context, index) {
+                final kontak = kontakList[index];
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  child: Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
                     ),
-                  );
-                },
-              ),
+                    elevation: 2,
+                    child: ListTile(
+                      leading: Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.blue[400]!,
+                              Colors.purple[400]!,
+                            ],
+                          ),
+                        ),
+                        child: CircleAvatar(
+                          radius: 23,
+                          backgroundColor: Colors.transparent,
+                          backgroundImage: AssetImage(kontak['foto']!),
+                        ),
+                      ),
+                      title: Text(
+                        kontak['nama']!,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
+                      ),
+                      subtitle: Text(
+                        kontak['telepon']!,
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      trailing: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.green[50],
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          icon: Icon(Icons.call_rounded, 
+                              color: Colors.green[600], size: 22),
+                          onPressed: () {
+                            _showCallDialog(context, kontak['nama']!);
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
-          );
-        },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showCallDialog(BuildContext context, String nama) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Icon(Icons.phone_rounded, 
+            color: Colors.green, size: 50),
+        content: Text(
+          'Menelepon $nama...',
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 16),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Tutup'),
+          ),
+        ],
       ),
     );
   }

@@ -13,7 +13,6 @@ class _KalkulatorPageState extends State<KalkulatorPage> {
   String _expression = '';
   String _result = '0';
 
-  // Tombol ditekan
   void _buttonPressed(String buttonText) {
     setState(() {
       switch (buttonText) {
@@ -42,7 +41,6 @@ class _KalkulatorPageState extends State<KalkulatorPage> {
           break;
 
         default:
-          // Hindari double operator seperti "++" atau "+×"
           if (_expression.isNotEmpty &&
               _isOperator(_expression[_expression.length - 1]) &&
               _isOperator(buttonText)) {
@@ -56,12 +54,10 @@ class _KalkulatorPageState extends State<KalkulatorPage> {
     });
   }
 
-  // Cek apakah tombol operator
   bool _isOperator(String s) {
     return ['+', '-', '×', '÷', '*', '/'].contains(s);
   }
 
-  // Fungsi menghitung ekspresi
   void _evaluate() {
     try {
       if (_expression.isEmpty) return;
@@ -83,7 +79,6 @@ class _KalkulatorPageState extends State<KalkulatorPage> {
     }
   }
 
-  // Kuadrat
   void _square() {
     try {
       double val = double.parse(_expression.isEmpty ? '0' : _expression);
@@ -97,7 +92,6 @@ class _KalkulatorPageState extends State<KalkulatorPage> {
     }
   }
 
-  // Akar
   void _sqrt() {
     try {
       double val = double.parse(_expression.isEmpty ? '0' : _expression);
@@ -113,36 +107,48 @@ class _KalkulatorPageState extends State<KalkulatorPage> {
     }
   }
 
-  // Widget tombol
-  Widget _buildButton(String buttonText, {Color? color}) {
+  Widget _buildButton(String buttonText, {Color? color, Color? textColor}) {
+    bool isSpecial = ['C', '⌫', '÷', '×', '-', '+', '='].contains(buttonText);
+
     return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.all(5.0),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            color: color ?? Colors.grey[200],
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 4,
-                offset: const Offset(2, 2),
-              ),
-            ],
-          ),
+      child: Container(
+        margin: const EdgeInsets.all(4),
+        child: Material(
+          color: Colors.transparent,
           child: InkWell(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(15),
             onTap: () => _buttonPressed(buttonText),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20.0),
+            child: Container(
+              decoration: BoxDecoration(
+                color: color ?? (isSpecial ? Colors.grey[100] : Colors.white),
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+                gradient: color != null
+                    ? LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          color,
+                          Color.alphaBlend(
+                              Colors.black.withOpacity(0.1), color),
+                        ],
+                      )
+                    : null,
+              ),
               child: Center(
                 child: Text(
                   buttonText,
                   style: TextStyle(
                     fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: color != null ? Colors.white : Colors.black,
+                    fontWeight: FontWeight.w600,
+                    color: textColor ??
+                        (isSpecial ? Colors.blue[700] : Colors.black87),
                   ),
                 ),
               ),
@@ -153,100 +159,142 @@ class _KalkulatorPageState extends State<KalkulatorPage> {
     );
   }
 
+  // --- PERBAIKAN ADA DI SINI ---
+  // Hapus 'Scaffold', 'body', dan 'backgroundColor'
+  // Langsung return 'SafeArea'
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[100],
-      body: SafeArea(
-        child: Column(
-          children: [
-            // 🔹 Bagian atas diperpendek (dari flex: 2 jadi flex: 1)
-            Expanded(
-              flex: 1,
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                alignment: Alignment.bottomRight,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
+    return SafeArea(
+      child: Column(
+        children: [
+          // Display Area
+          Expanded(
+            flex: 1, // Anda bisa ubah rasio flex ini jika mau
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    reverse: true,
+                    child: Text(
                       _expression,
-                      style: const TextStyle(
-                        fontSize: 24, // 🔽 dari 32 → 24 agar muat
-                        color: Colors.black54,
+                      style: TextStyle(
+                        fontSize: 28,
+                        color: Colors.grey[600],
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
+                  ),
+                  const SizedBox(height: 10),
+                  // Saya tambahkan FittedBox di sini agar angka tidak overflow
+                  FittedBox(
+                    fit: BoxFit.contain,
+                    child: Text(
                       _result,
-                      style: const TextStyle(
-                        fontSize: 40, // 🔽 dari 52 → 40 agar lebih ramping
+                      style: TextStyle(
+                        fontSize: 48,
                         fontWeight: FontWeight.bold,
-                        color: Colors.deepPurple,
+                        color: Colors.blue[700],
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
+          ),
 
-            // 🔹 Bagian tombol tetap proporsional
-            Expanded(
-              flex: 3,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                child: Column(
-                  children: [
-                    Row(
+          // Buttons Area
+          Expanded(
+            flex: 3, // Rasio flex (bisa diubah, misal jadi 2)
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(30),
+                  topRight: Radius.circular(30),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, -5),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  // --- Agar tombolnya pas ---
+                  // Bungkus tiap Row dengan Expanded
+                  Expanded(
+                    child: Row(
                       children: [
-                        _buildButton('C', color: Colors.red[400]),
-                        _buildButton('√', color: Colors.grey[600]),
-                        _buildButton('x²', color: Colors.grey[600]),
-                        _buildButton('÷', color: Colors.deepPurple),
+                        _buildButton('C',
+                            color: Colors.red[400], textColor: Colors.white),
+                        _buildButton('√',
+                            color: Colors.blue[700], textColor: Colors.white),
+                        _buildButton('x²',
+                            color: Colors.blue[700], textColor: Colors.white),
+                        _buildButton('÷',
+                            color: Colors.blue[700], textColor: Colors.white),
                       ],
                     ),
-                    Row(
+                  ),
+                  Expanded(
+                    child: Row(
                       children: [
                         _buildButton('7'),
                         _buildButton('8'),
                         _buildButton('9'),
-                        _buildButton('×', color: Colors.deepPurple),
+                        _buildButton('×',
+                            color: Colors.blue[700], textColor: Colors.white),
                       ],
                     ),
-                    Row(
+                  ),
+                  Expanded(
+                    child: Row(
                       children: [
                         _buildButton('4'),
                         _buildButton('5'),
                         _buildButton('6'),
-                        _buildButton('-', color: Colors.deepPurple),
+                        _buildButton('-',
+                            color: Colors.blue[700], textColor: Colors.white),
                       ],
                     ),
-                    Row(
+                  ),
+                  Expanded(
+                    child: Row(
                       children: [
                         _buildButton('1'),
                         _buildButton('2'),
                         _buildButton('3'),
-                        _buildButton('+', color: Colors.deepPurple),
+                        _buildButton('+',
+                            color: Colors.blue[700], textColor: Colors.white),
                       ],
                     ),
-                    Row(
+                  ),
+                  Expanded(
+                    child: Row(
                       children: [
-                        _buildButton('⌫', color: Colors.grey[700]),
+                        _buildButton('⌫',
+                            color: Colors.orange[400],
+                            textColor: Colors.white),
                         _buildButton('0'),
                         _buildButton('.'),
-                        _buildButton('=', color: Colors.deepPurple),
+                        _buildButton('=',
+                            color: Colors.green[500],
+                            textColor: Colors.white),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
